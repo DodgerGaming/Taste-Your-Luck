@@ -1,4 +1,6 @@
 from Logic.Combat import shoot
+import os
+
 def play_round(player, enemy, shotgun):
     
 
@@ -8,20 +10,40 @@ def play_round(player, enemy, shotgun):
 
         current_turn = "player"
 
+
         while len(shotgun.bullets) > 0:
 
+            # --- Player Turn ---
             if current_turn == "player":
-                shoot(enemy, shotgun)
-                current_turn = "enemy"
+                print(f"===PLAYER TURN===\nHP:{player.currentHp}\n")
+                choice = int(input("What'll you do?\n1.Shoot enemy\n2. Shoot self\n3.Use Item\n\n"))
                 
+                if choice == 1:
+                    shoot(enemy, shotgun)
+                    current_turn = "enemy"
+                elif choice == 2:
+                    if shotgun.bullets[0] == "blank":
+                        current_turn == "player"
+                        print("Player dodged the bullet of death\n\n")
+                    else:
+                        print("Tough luck boy\n\n")
+                        current_turn == "enemy"
+                    shoot(player, shotgun)
+                else:
+                    pass
+
+            # --- Enemy Turn ---
             else:
+                print(f"===ENEMY TURN===\nHP:{enemy.currentHp}\n")
                 shoot(player, shotgun)
                 current_turn = "player"
             
             if not player.is_alive() or not enemy.is_alive():
                 break
+            
+            os.system('cls')
 
-    # --- Determining who win ---
+    # --- Determining who won ---
     if player.is_alive():
         print("You won")
     else:
