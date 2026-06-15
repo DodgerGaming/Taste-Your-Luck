@@ -13,10 +13,7 @@ def play_round(player, enemy, shotgun):
             if current_turn == "player":
                 shoot(enemy, shotgun)
                 current_turn = "enemy"
-
-            if not player.is_alive() or not enemy.is_alive():
-                break
-
+                
             else:
                 shoot(player, shotgun)
                 current_turn = "player"
