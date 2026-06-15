@@ -8,4 +8,8 @@ class Actor:
         self.currentHp -= amount
 
     def is_alive(self):
-        return self.current > 0
+        return self.currentHp > 0
+    
+    def level_up(self):
+        self.maxHp += 2
+        self.currentHp = self.maxHp

@@ -1,6 +1,18 @@
 import pygame
 from Entities.Actor import Actor
 from Entities.Shotgun import Shotgun
+from Logic.Combat import shoot
+from System.Round_system import play_round
+
+
+player = Actor()
+enemy = Actor()
+shotgun = Shotgun()
+
+play_round(player, enemy, shotgun)
+
+
+
 
 """
 pygame.init()

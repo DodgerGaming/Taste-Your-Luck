@@ -22,11 +22,15 @@ class Shotgun:
             else:
                 shells.append("blank")
 
+        print(shells)
+
         random.shuffle(shells)
+
+        print(shells)
 
         self.bullets = shells   
 
-    def shoot(self):
+    def fire(self):
         if len(self.bullets) == 0:
             return None
         
