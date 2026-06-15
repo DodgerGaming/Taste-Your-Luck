@@ -18,9 +18,9 @@ class Shotgun:
         # --- Randomizing the order ---
         for x in range(quantity): # adding the live and blank bullets to bullet list
             if x < live:
-                shells.append(True)
+                shells.append("live")
             else:
-                shells.append(False)
+                shells.append("blank")
 
         random.shuffle(shells)
 
