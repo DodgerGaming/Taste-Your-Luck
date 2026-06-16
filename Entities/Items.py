@@ -13,7 +13,6 @@ class Hp_Pill(Items):
     def use(self, user, shotgun):
         user.currentHp += 1
 
-
 class Monster_Drink(Items):
     def __init__(self):
         super().__init__("Monster drink")
@@ -21,7 +20,6 @@ class Monster_Drink(Items):
     def use(self, user, shotgun):
         shell = shotgun.bullets.pop(0)
         print(f"{shell} has been ejected to chamber")
-        
 
 class Hacksaw(Items):
     def __init__(self):

@@ -14,7 +14,6 @@ def item_distribution(player, enemy, level):
         player.obtain(generate_random_item())
 
         enemy.obtain(generate_random_item())
-
 """
 
 def play_level(player, enemy, shotgun, level):
@@ -26,11 +25,11 @@ def play_level(player, enemy, shotgun, level):
 
 
         while len(shotgun.bullets) > 0: # round loop
-
+            
             # --- Player Turn ---
             if current_turn == "player":
                 print(f"===PLAYER TURN===\nHP: {player.currentHp}\nEnemyHP: {enemy.currentHp}\nCurrent Level: {level}\n")
-                choice = int(input("What'll you do?\n1.Shoot enemy\n2. Shoot self\n3.Use Item\n\n"))
+                choice = int(input("What'll you do?\n1.Shoot enemy\n2. Shoot self\n\n"))
                 
                 if choice == 1:
                     if shoot(player, enemy, shotgun) == "blank":
@@ -47,10 +46,6 @@ def play_level(player, enemy, shotgun, level):
                     else:
                         print("Tough luck boy\n\n")
                         current_turn = "enemy"
-                
-                else: #TODO: add item implementation
-                    pass
-
             # --- Enemy Turn ---
             else:
                 print(f"===ENEMY TURN===\nHP: {player.currentHp}\nEnemyHP: {enemy.currentHp}\n\nCurrent Level: {level}\n")
