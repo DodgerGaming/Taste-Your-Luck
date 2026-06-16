@@ -19,7 +19,7 @@ def item_distribution(player, enemy, level):
 
 def play_level(player, enemy, shotgun, level):
     
-    while player.is_alive() and enemy.is_alive():
+    while player.is_alive() and enemy.is_alive(): # level loop
         shotgun.reload()
 
         current_turn = "player"
@@ -29,12 +29,17 @@ def play_level(player, enemy, shotgun, level):
 
             # --- Player Turn ---
             if current_turn == "player":
-                print(f"===PLAYER TURN===\nHP:{player.currentHp}\nCurrent Level: {level}\n")
+                print(f"===PLAYER TURN===\nHP: {player.currentHp}\nEnemyHP: {enemy.currentHp}\nCurrent Level: {level}\n")
                 choice = int(input("What'll you do?\n1.Shoot enemy\n2. Shoot self\n3.Use Item\n\n"))
                 
                 if choice == 1:
-                    shoot(player, enemy, shotgun)
+                    if shoot(player, enemy, shotgun) == "blank":
+                        print("Player shot nothing to enemy")
+                    else:
+                        print("Player hit the enemy!")
+                    
                     current_turn = "enemy"
+
                 elif choice == 2:
                     if shoot(player, player, shotgun) == "blank":
                         current_turn = "player"
@@ -42,13 +47,17 @@ def play_level(player, enemy, shotgun, level):
                     else:
                         print("Tough luck boy\n\n")
                         current_turn = "enemy"
+                
                 else: #TODO: add item implementation
                     pass
 
             # --- Enemy Turn ---
             else:
-                print(f"===ENEMY TURN===\nHP:{enemy.currentHp}\nCurrent Level: {level}\n")
-                shoot(enemy, player, shotgun)
+                print(f"===ENEMY TURN===\nHP: {player.currentHp}\nEnemyHP: {enemy.currentHp}\n\nCurrent Level: {level}\n")
+                if shoot(enemy, player, shotgun) == "blank":
+                    print("enemy shoot nothing to player")
+                else:
+                    print("Enemy hit the player!")
                 current_turn = "player"
             
             if not player.is_alive() or not enemy.is_alive():
@@ -59,11 +68,14 @@ def play_level(player, enemy, shotgun, level):
 
     # --- Determining who won ---
     if player.is_alive():
-        print("You won, proceeding to next stage")
+        if level < 3:
+            print("You won, proceeding to next stage")
+
+        time.sleep(2)
         return "player"
         
+        
     else:
-        print("You suck. Try again next life")
         return "enemy"
 
 

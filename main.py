@@ -11,14 +11,22 @@ enemy = Actor()
 shotgun = Shotgun()
 
 current_level = 1
+win_count = 0
 
 while current_level <= 3:
     winner = play_level(player, enemy, shotgun, current_level)
 
     if winner == "player":
         current_level = next_level(player, enemy, current_level)
+        win_count += 1
     else:
         break
+
+if win_count == 3:
+    print("Congratulations, you've won the game!")
+else:
+    print("You've lost, try again next life.")
+print(f"===GAME STATUS ===\nLevels won: {win_count}\nTo be implemented...")
 
 
 """
