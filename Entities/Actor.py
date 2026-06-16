@@ -1,9 +1,12 @@
+
 class Actor:
+    MAX_ITEMS = 8
+
     def __init__(self):
         self.maxHp = 2
         self.currentHp = self.maxHp
         self.items = []
-        self.damage = 1
+        self.damage_multiplier = 1
     
     def take_damage(self, amount):
         self.currentHp -= amount
@@ -11,12 +14,13 @@ class Actor:
     def is_alive(self):
         return self.currentHp > 0
     
-    def use_item(self, index):
+    def use_item(self, index, shotgun):
         item = self.items.pop(index)
-        item.use(self)
+        item.use(self, shotgun)
 
     def obtain_item(self, item):
-        self.items.append(item)
+        if len(self.items) < self.MAX_ITEMS:
+            self.items.append(item)
 
     def level_up(self):
         self.maxHp += 2

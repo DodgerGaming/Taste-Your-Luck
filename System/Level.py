@@ -1,49 +1,82 @@
 from Logic.Combat import shoot
 import os
-
-def play_round(player, enemy, shotgun):
+import time
     
+"""
+def item_distribution(player, enemy, level):
 
+    if level == 2:
+        amount = 2
+    elif level == 4:
+        amount = 4
 
+    for _ in range(amount):
+        player.obtain(generate_random_item())
+
+        enemy.obtain(generate_random_item())
+
+"""
+
+def play_level(player, enemy, shotgun, level):
+    
     while player.is_alive() and enemy.is_alive():
         shotgun.reload()
 
         current_turn = "player"
 
 
-        while len(shotgun.bullets) > 0:
+        while len(shotgun.bullets) > 0: # round loop
 
             # --- Player Turn ---
             if current_turn == "player":
-                print(f"===PLAYER TURN===\nHP:{player.currentHp}\n")
+                print(f"===PLAYER TURN===\nHP:{player.currentHp}\nCurrent Level: {level}\n")
                 choice = int(input("What'll you do?\n1.Shoot enemy\n2. Shoot self\n3.Use Item\n\n"))
                 
                 if choice == 1:
-                    shoot(enemy, shotgun)
+                    shoot(player, enemy, shotgun)
                     current_turn = "enemy"
                 elif choice == 2:
-                    if shoot(player, shotgun) == "blank":
-                        current_turn == "player"
+                    if shoot(player, player, shotgun) == "blank":
+                        current_turn = "player"
                         print("Player dodged the bullet of death\n\n")
                     else:
                         print("Tough luck boy\n\n")
-                        current_turn == "enemy"
+                        current_turn = "enemy"
                 else: #TODO: add item implementation
                     pass
 
             # --- Enemy Turn ---
             else:
-                print(f"===ENEMY TURN===\nHP:{enemy.currentHp}\n")
-                shoot(player, shotgun)
+                print(f"===ENEMY TURN===\nHP:{enemy.currentHp}\nCurrent Level: {level}\n")
+                shoot(enemy, player, shotgun)
                 current_turn = "player"
             
             if not player.is_alive() or not enemy.is_alive():
                 break
             
+            time.sleep(2)
             os.system('cls')
 
     # --- Determining who won ---
     if player.is_alive():
-        print("You won")
+        print("You won, proceeding to next stage")
+        return "player"
+        
     else:
         print("You suck. Try again next life")
+        return "enemy"
+
+
+def next_level(player, enemy, level):
+    level += 1
+
+    player.items.clear()
+    enemy.items.clear()
+
+    player.maxHp += 2
+    player.currentHp = player.maxHp
+
+    enemy.maxHp += 2
+    enemy.currentHp = enemy.maxHp
+
+    return level

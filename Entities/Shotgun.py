@@ -36,7 +36,7 @@ class Shotgun:
         
         return self.bullets.pop(0)
 
-    def show_current_shell(self):
+    def peek_current_shell(self):
         if len(self.bullets) > 0:
             return self.bullets[0]
         

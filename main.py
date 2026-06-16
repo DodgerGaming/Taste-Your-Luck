@@ -2,16 +2,23 @@ import pygame
 from Entities.Actor import Actor
 from Entities.Shotgun import Shotgun
 from Logic.Combat import shoot
-from System.Level import play_round
+from System.Level import play_level
+from System.Level import next_level
 
 
 player = Actor()
 enemy = Actor()
 shotgun = Shotgun()
 
-play_round(player, enemy, shotgun)
+current_level = 1
 
+while current_level <= 3:
+    winner = play_level(player, enemy, shotgun, current_level)
 
+    if winner == "player":
+        current_level = next_level(player, enemy, current_level)
+    else:
+        break
 
 
 """

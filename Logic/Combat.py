@@ -1,11 +1,10 @@
-def shoot(target, shotgun): # uses shotgun class and applies dmg to who
+def shoot(shooter, target, shotgun): # uses shotgun class and applies dmg to who
 
     shell = shotgun.fire()
 
     if shell == "live":
-        target.take_damage()
-        print("Boom")
-    else:
-        print("Nope")
+        damage = 1 * shooter.damage_multiplier # flexible logic so even if user use hacksaw, dmg calculation is still right.
+        
+        target.take_damage(damage)
 
     return shell
