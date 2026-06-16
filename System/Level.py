@@ -77,8 +77,8 @@ def play_level(player, enemy, shotgun, level):
 def next_level(player, enemy, level):
     level += 1
 
-    player.items.clear()
-    enemy.items.clear()
+    # player.items.clear()
+    # enemy.items.clear()
 
     player.maxHp += 2
     player.currentHp = player.maxHp
