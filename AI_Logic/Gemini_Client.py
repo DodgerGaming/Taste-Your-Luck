@@ -10,6 +10,8 @@ genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-response = model.generate_content("Say your AI model name only.")
 
-print(response.text)
+def ask_gemini(prompt):
+    response = model.generate_content(prompt)
+
+    print(response.text)

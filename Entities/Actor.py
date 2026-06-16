@@ -10,6 +10,9 @@ class Actor:
     
     def take_damage(self, amount):
         self.currentHp -= amount
+        
+        if self.currentHp < 0: # validation for over damage
+            self.currentHp = 0
 
     def is_alive(self):
         return self.currentHp > 0
@@ -23,7 +26,13 @@ class Actor:
         if len(self.items) < self.MAX_ITEMS:
             self.items.append(item)
     """
-    
+
     def level_up(self):
         self.maxHp += 2
         self.currentHp = self.maxHp
+
+    def heal(self, amount):
+        self.currentHp += amount 
+        
+        if self.currentHp > self.maxHp: # validation for overheal
+            self.currentHp = self.maxHp

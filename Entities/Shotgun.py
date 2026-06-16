@@ -4,6 +4,7 @@ class Shotgun:
     
     def __init__(self):
         self.bullets = []
+        self.damage = 1
     
     def reload(self):
 

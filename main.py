@@ -1,7 +1,6 @@
 import pygame
 from Entities.Actor import Actor
 from Entities.Shotgun import Shotgun
-from Logic.Combat import shoot
 from System.Level import play_level
 from System.Level import next_level
 
