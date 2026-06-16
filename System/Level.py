@@ -22,14 +22,13 @@ def play_round(player, enemy, shotgun):
                     shoot(enemy, shotgun)
                     current_turn = "enemy"
                 elif choice == 2:
-                    if shotgun.bullets[0] == "blank":
+                    if shoot(player, shotgun) == "blank":
                         current_turn == "player"
                         print("Player dodged the bullet of death\n\n")
                     else:
                         print("Tough luck boy\n\n")
                         current_turn == "enemy"
-                    shoot(player, shotgun)
-                else:
+                else: #TODO: add item implementation
                     pass
 
             # --- Enemy Turn ---
