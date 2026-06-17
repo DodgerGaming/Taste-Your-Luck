@@ -72,15 +72,16 @@ def play_level(player, enemy, shotgun, level):
                         print("Enemy shot nothing to player")
                     else:
                         print("Enemy hit the player!")
+                    
+                    current_turn = "player"
 
                 else:
                     if shoot(enemy, enemy, shotgun) == "blank":
                         print("Enemy dodged the bullet of death")
+                        current_turn = "enemy"
                     else:
                         print("Enemy shot itself!")
-
-                current_turn = "player"
-
+                        current_turn = "player"
 
             if not player.is_alive() or not enemy.is_alive():
                 break
