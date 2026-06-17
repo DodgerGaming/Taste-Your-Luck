@@ -13,5 +13,5 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 
 def ask_gemini(prompt):
     response = model.generate_content(prompt)
-
-    print(response.text)
+    
+    return response.text.strip()

@@ -95,7 +95,7 @@ def play_level(player, enemy, shotgun, level):
 
             
             time.sleep(2)
-            os.system('cls')
+            #os.system('cls')
 
     # --- Determining who won ---
     if player.is_alive():
