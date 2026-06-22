@@ -1,5 +1,13 @@
 from Logic.Combat import shoot
 from AI_Logic.AI import get_ai_choice
+from System.Fate import draw_fate_card, apply_fate_card
+
+FATE_CARD_NAMES = {
+    "fortune": "Fortune",
+    "devil": "Devil",
+    "hanged_man": "Hanged Man",
+    "death": "Death",
+}
 
 
 class TurnManager:
@@ -8,20 +16,41 @@ class TurnManager:
         self.game         = game
         self.current_turn = "player"
         self.current_fate = None
-        self.level= self.game.level
 
     # ------------------------------------------------------------------
     # Reload
     # ------------------------------------------------------------------
 
     def reload(self):
+    # Returns a list of messages (shotgun load info + fate card, if any).
+        messages = []
+
         # Reset damage and multipliers so they don't carry over between rounds
         self.game.shotgun.damage = 1
         self.game.player.damage_multiplier = 1
         self.game.shotgun.reload()
+
         live  = self.game.shotgun.bullets.count("live")
         blank = self.game.shotgun.bullets.count("blank")
-        return f"Shotgun loaded  —  Live: {live}  |  Blank: {blank}"
+        messages.append(f"Shotgun loaded  —  Live: {live}  |  Blank: {blank}")
+
+        messages.extend(self._draw_and_apply_fate_card())
+
+        return messages
+
+    def _draw_and_apply_fate_card(self):
+        """Draws a fate card for the current level and applies its effect.
+        Returns a list with one message if a card appeared, otherwise empty."""
+        messages = []
+
+        self.current_fate = draw_fate_card(self.game.level)
+
+        if self.current_fate:
+            card_name = FATE_CARD_NAMES.get(self.current_fate, self.current_fate)
+            messages.append(f"A Fate Card appears: {card_name}!")
+            apply_fate_card(self.current_fate, self.game.player, self.game.shotgun)
+
+        return messages
 
     # ------------------------------------------------------------------
     # Player actions
@@ -34,7 +63,7 @@ class TurnManager:
         result = shoot(self.game.player, self.game.player, self.game.shotgun)
 
         if result is None:
-            messages.append(self.reload())
+            messages.extend(self.reload())
             messages.append("What will you do?")
             return messages, self.check_game_over()
 
@@ -69,7 +98,7 @@ class TurnManager:
         result = shoot(self.game.player, self.game.enemy, self.game.shotgun)
 
         if result is None:
-            messages.append(self.reload())
+            messages.extend(self.reload())
             messages.append("What will you do?")
             return messages, self.check_game_over()
 
@@ -117,14 +146,14 @@ class TurnManager:
                 self.game.enemy,
                 self.game.shotgun,
                 self.current_fate,
-                self.level
+                self.game.level
             )
 
             if choice == 1:  # shoot player
                 result = shoot(self.game.enemy, self.game.player, self.game.shotgun)
 
                 if result is None:
-                    messages.append(self.reload())
+                    messages.extend(self.reload())
                     self.current_turn = "player"
                 elif result == "blank":
                     messages.append("Enemy fires at you... click. Nothing.")
@@ -137,7 +166,7 @@ class TurnManager:
                 result = shoot(self.game.enemy, self.game.enemy, self.game.shotgun)
 
                 if result is None:
-                    messages.append(self.reload())
+                    messages.extend(self.reload())
                     self.current_turn = "player"
                 elif result == "blank":
                     # Enemy keeps turn — loop continues
