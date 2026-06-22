@@ -8,7 +8,7 @@ class TurnManager:
         self.game         = game
         self.current_turn = "player"
         self.current_fate = None
-        self.level        = 1
+        self.level= self.game.level
 
     # ------------------------------------------------------------------
     # Reload
