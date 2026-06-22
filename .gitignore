@@ -1,4 +1,7 @@
 __pycache__/
 .env
 .git/
+
+*tempCodeRunnerFile.py
+*tempCodeRunnerFile.python
 tempCodeRunnerFile

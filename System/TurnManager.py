@@ -1,5 +1,13 @@
 from Logic.Combat import shoot
 from AI_Logic.AI import get_ai_choice
+from System.Fate import draw_fate_card, apply_fate_card
+
+FATE_CARD_NAMES = {
+    "fortune": "Fortune",
+    "devil": "Devil",
+    "hanged_man": "Hanged Man",
+    "death": "Death",
+}
 
 
 class TurnManager:
@@ -8,20 +16,67 @@ class TurnManager:
         self.game         = game
         self.current_turn = "player"
         self.current_fate = None
-        self.level        = 1
+        self.final_showdown = False
 
     # ------------------------------------------------------------------
     # Reload
     # ------------------------------------------------------------------
 
     def reload(self):
+    # Returns a list of messages (shotgun load info + fate card, if any).
+        messages = []
+
         # Reset damage and multipliers so they don't carry over between rounds
         self.game.shotgun.damage = 1
         self.game.player.damage_multiplier = 1
         self.game.shotgun.reload()
+
         live  = self.game.shotgun.bullets.count("live")
         blank = self.game.shotgun.bullets.count("blank")
-        return f"Shotgun loaded  —  Live: {live}  |  Blank: {blank}"
+        messages.append(f"Shotgun loaded  —  Live: {live}  |  Blank: {blank}")
+
+        messages.extend(self._draw_and_apply_fate_card())
+
+        return messages
+
+    def _draw_and_apply_fate_card(self):
+        """Draws a fate card for the current level and applies its effect.
+        Returns a list with one message if a card appeared, otherwise empty."""
+        messages = []
+
+        # Once the final showdown has triggered, Death stays active for
+        # the rest of the level — no more random draws.
+        if self.final_showdown:
+            self.current_fate = "death"
+            apply_fate_card("death", self.game.player, self.game.shotgun)
+            return messages
+
+        self.current_fate = draw_fate_card(self.game.level)
+
+        if self.current_fate:
+            card_name = FATE_CARD_NAMES.get(self.current_fate, self.current_fate)
+            messages.append(f"A Fate Card appears: {card_name}!")
+            apply_fate_card(self.current_fate, self.game.player, self.game.shotgun)
+
+        return messages
+    
+    def _check_final_showdown(self):
+        """
+        Checks whether the level-3 Death trigger should activate (either
+        fighter at 2 HP or below). Runs after every shot so it can kick in
+        immediately, even mid-round. Once triggered it stays on for the
+        rest of the level.
+        """
+        if self.final_showdown:
+            return []
+
+        if self.game.level == 3 and (self.game.player.currentHp <= 2 or self.game.enemy.currentHp <= 2):
+            self.final_showdown = True
+            self.current_fate = "death"
+            apply_fate_card("death", self.game.player, self.game.shotgun)
+            return ["The Death card reveals itself... this is the final showdown!"]
+
+        return []
 
     # ------------------------------------------------------------------
     # Player actions
@@ -32,9 +87,10 @@ class TurnManager:
         messages = []
 
         result = shoot(self.game.player, self.game.player, self.game.shotgun)
+        messages.extend(self._check_final_showdown())
 
         if result is None:
-            messages.append(self.reload())
+            messages.extend(self.reload())
             messages.append("What will you do?")
             return messages, self.check_game_over()
 
@@ -67,9 +123,10 @@ class TurnManager:
         messages = []
 
         result = shoot(self.game.player, self.game.enemy, self.game.shotgun)
+        messages.extend(self._check_final_showdown())
 
         if result is None:
-            messages.append(self.reload())
+            messages.extend(self.reload())
             messages.append("What will you do?")
             return messages, self.check_game_over()
 
@@ -117,14 +174,15 @@ class TurnManager:
                 self.game.enemy,
                 self.game.shotgun,
                 self.current_fate,
-                self.level
+                self.game.level
             )
 
             if choice == 1:  # shoot player
                 result = shoot(self.game.enemy, self.game.player, self.game.shotgun)
+                messages.extend(self._check_final_showdown())
 
                 if result is None:
-                    messages.append(self.reload())
+                    messages.extend(self.reload())
                     self.current_turn = "player"
                 elif result == "blank":
                     messages.append("Enemy fires at you... click. Nothing.")
@@ -135,9 +193,10 @@ class TurnManager:
 
             else:  # shoot self
                 result = shoot(self.game.enemy, self.game.enemy, self.game.shotgun)
+                messages.extend(self._check_final_showdown())
 
                 if result is None:
-                    messages.append(self.reload())
+                    messages.extend(self.reload())
                     self.current_turn = "player"
                 elif result == "blank":
                     # Enemy keeps turn — loop continues
@@ -151,6 +210,30 @@ class TurnManager:
                 break
 
         return messages
+
+    # ------------------------------------------------------------------
+    # Level progression
+    # ------------------------------------------------------------------
+
+    def advance_level(self):
+        """
+        Call this after the player wins a level (level < 3).
+        Bumps the level, heals both fighters, and raises max HP.
+        Returns a list of messages describing what happened.
+        """
+        self.game.level += 1
+
+        self.game.player.maxHp += 2
+        self.game.player.currentHp = self.game.player.maxHp
+
+        self.game.enemy.maxHp += 2
+        self.game.enemy.currentHp = self.game.enemy.maxHp
+
+        self.current_turn = "player"
+        self.current_fate = None
+
+        return [f"Level {self.game.level}! Max HP increased to {self.game.player.maxHp}."]
+
 
     # ------------------------------------------------------------------
     # Win / lose check
