@@ -1,57 +1,47 @@
-from UI.Main_Menu import MainMenu
-from UI.Game_Screen import GameScreen
-
 import pygame
+
+from UI.Screens.Menu_Screen import MenuScreen
 
 pygame.init()
 
-window_width = 1000
-window_height = 500
+# Window Settings
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 
-window = pygame.display.set_mode(
-    (window_width, window_height)
-)
-
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Taste Your Luck")
 
 clock = pygame.time.Clock()
 
-# Create screens
-main_menu = MainMenu()
-game_screen = GameScreen()
-
-# Current screen
-current_screen = "menu"
+# Starting Screen
+current_screen = MenuScreen()
 
 running = True
 
 while running:
 
+    dt = clock.tick(60) / 1000
+
+    # Events
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
             running = False
 
-        # Mouse clicks
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        current_screen.handle_event(event)
 
-            if current_screen == "menu":
+    # Update Current Screen
+    current_screen.update(dt)
 
-                if main_menu.start_button.collidepoint(event.pos):
-                    current_screen = "game"
+    # Screen Switching
+    next_screen = current_screen.get_next_screen()
 
-                if main_menu.quit_button.collidepoint(event.pos):
-                    running = False
+    if next_screen is not None:
+        current_screen = next_screen
 
-    # Draw current screen
-    if current_screen == "menu":
-        main_menu.draw(window)
-
-    elif current_screen == "game":
-        game_screen.draw(window)
+    # Draw Current Screen
+    current_screen.draw(screen)
 
     pygame.display.flip()
-
-    clock.tick(60)
 
 pygame.quit()
