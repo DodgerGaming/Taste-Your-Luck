@@ -20,11 +20,23 @@ class TurnManager:
         self.final_showdown = False
 
     # ------------------------------------------------------------------
+    # Helper — snapshot current state into a tagged message
+    # ------------------------------------------------------------------
+
+    def _snap(self, text):
+        """Wrap a message with the current game state snapshot."""
+        return {
+            "text":      text,
+            "player_hp": self.game.player.currentHp,
+            "enemy_hp":  self.game.enemy.currentHp,
+            "turn":      self.current_turn,
+        }
+
+    # ------------------------------------------------------------------
     # Reload
     # ------------------------------------------------------------------
 
     def reload(self):
-        """Returns a list of messages (shotgun load info + fate card, if any)."""
         messages = []
 
         self.game.shotgun.damage = 1
@@ -33,7 +45,7 @@ class TurnManager:
 
         live  = self.game.shotgun.bullets.count("live")
         blank = self.game.shotgun.bullets.count("blank")
-        messages.append(f"Shotgun loaded — Live: {live} | Blank: {blank}")
+        messages.append(self._snap(f"Shotgun loaded — Live: {live} | Blank: {blank}"))
 
         messages.extend(self._draw_and_apply_fate_card())
 
@@ -51,8 +63,8 @@ class TurnManager:
 
         if self.current_fate:
             card_name = FATE_CARD_NAMES.get(self.current_fate, self.current_fate)
-            messages.append(f"A Fate Card appears: {card_name}!")
             apply_fate_card(self.current_fate, self.game.player, self.game.shotgun)
+            messages.append(self._snap(f"A Fate Card appears: {card_name}!"))
 
         return messages
 
@@ -64,7 +76,7 @@ class TurnManager:
             self.final_showdown = True
             self.current_fate = "death"
             apply_fate_card("death", self.game.player, self.game.shotgun)
-            return ["The Death card reveals itself... this is the final showdown!"]
+            return [self._snap("The Death card reveals itself... this is the final showdown!")]
 
         return []
 
@@ -80,17 +92,18 @@ class TurnManager:
 
         if result is None:
             messages.extend(self.reload())
-            messages.append("What will you do?")
+            messages.append(self._snap("What will you do?"))
             return messages, self.check_game_over()
 
         if result == "blank":
             self.current_turn = "player"
-            messages.append("You pull the trigger... click. Nothing.")
-            messages.append("What will you do?")
+            messages.append(self._snap("You pull the trigger... click. Nothing."))
+            messages.append(self._snap("What will you do?"))
             return messages, self.check_game_over()
 
-        messages.append("Bang! You shot yourself.")
+        # Live — set turn to enemy BEFORE snapping so label shows correctly
         self.current_turn = "enemy"
+        messages.append(self._snap("Bang! You shot yourself."))
 
         game_over = self.check_game_over()
         if game_over:
@@ -101,7 +114,7 @@ class TurnManager:
 
         game_over = self.check_game_over()
         if not game_over:
-            messages.append("What will you do?")
+            messages.append(self._snap("What will you do?"))
 
         return messages, game_over
 
@@ -113,15 +126,16 @@ class TurnManager:
 
         if result is None:
             messages.extend(self.reload())
-            messages.append("What will you do?")
+            messages.append(self._snap("What will you do?"))
             return messages, self.check_game_over()
 
-        if result == "blank":
-            messages.append("You fire at the enemy... click. Nothing.")
-        else:
-            messages.append("Direct hit! The enemy takes damage.")
-
+        # Set turn to enemy BEFORE snapping so label shows correctly
         self.current_turn = "enemy"
+
+        if result == "blank":
+            messages.append(self._snap("You fire at the enemy... click. Nothing."))
+        else:
+            messages.append(self._snap("Direct hit! The enemy takes damage."))
 
         game_over = self.check_game_over()
         if game_over:
@@ -132,7 +146,7 @@ class TurnManager:
 
         game_over = self.check_game_over()
         if not game_over:
-            messages.append("What will you do?")
+            messages.append(self._snap("What will you do?"))
 
         return messages, game_over
 
@@ -157,32 +171,36 @@ class TurnManager:
                 self.game.level
             )
 
+            # Announce enemy is acting BEFORE firing — turn is still "enemy" here
+            messages.append(self._snap("The enemy is thinking..."))
+
             if choice == 1:
                 result = shoot(self.game.enemy, self.game.player, self.game.shotgun)
                 messages.extend(self._check_final_showdown())
 
                 if result is None:
+                    self.current_turn = "player"
                     messages.extend(self.reload())
-                    self.current_turn = "player"
                 elif result == "blank":
-                    messages.append("Enemy fires at you... click. Nothing.")
                     self.current_turn = "player"
+                    messages.append(self._snap("Enemy fires at you... click. Nothing."))
                 else:
-                    messages.append("The enemy shoots you!")
                     self.current_turn = "player"
+                    messages.append(self._snap("The enemy shoots you!"))
 
             else:
                 result = shoot(self.game.enemy, self.game.enemy, self.game.shotgun)
                 messages.extend(self._check_final_showdown())
 
                 if result is None:
+                    self.current_turn = "player"
                     messages.extend(self.reload())
-                    self.current_turn = "player"
                 elif result == "blank":
-                    messages.append("Enemy gambles on itself... click. Nothing.")
+                    # Keep enemy turn — don't change current_turn
+                    messages.append(self._snap("Enemy gambles on itself... click. Nothing."))
                 else:
-                    messages.append("The enemy shoots itself!")
                     self.current_turn = "player"
+                    messages.append(self._snap("The enemy shoots itself!"))
 
             if self.check_game_over():
                 self.current_turn = "player"
@@ -206,7 +224,7 @@ class TurnManager:
         self.current_turn = "player"
         self.current_fate = None
 
-        return [f"Level {self.game.level}! Max HP increased to {self.game.player.maxHp}."]
+        return [self._snap(f"Level {self.game.level}! Max HP increased to {self.game.player.maxHp}.")]
 
     # ------------------------------------------------------------------
     # Win / lose check

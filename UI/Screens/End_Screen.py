@@ -5,9 +5,10 @@ from UI.Screens.Screen import Screen
 
 class EndScreen(Screen):
 
-    def __init__(self):
+    def __init__(self, result):
         super().__init__()
 
+        self.result = result 
         self.font = pygame.font.Font(None, 80)
 
     def handle_event(self, event):
@@ -22,10 +23,20 @@ class EndScreen(Screen):
 
         screen.fill((20, 20, 20))
 
-        text = self.font.render(
-            "END - PRESS ESC",
+        if self.result == "player_win":
+            message = "YOU WIN!"
+        else:
+            message = "YOU LOSE."
+
+        text = self.font.render(message, True, (255, 255, 255))
+        subtext = self.font.render(
+            "PRESS ESC TO RETURN",
             True,
-            (255, 255, 255)
+            (160, 120, 80)
         )
 
-        screen.blit(text, (250, 300))
+        text_rect = text.get_rect(center=(640, 280))
+        sub_rect = subtext.get_rect(center=(640, 370))
+
+        screen.blit(text, text_rect)
+        screen.blit(subtext, sub_rect)

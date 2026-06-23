@@ -6,9 +6,10 @@ def get_ai_choice(player, enemy, shotgun, current_fate, level):
 
 
     if not USE_GEMINI:
-        from AI_Logic.Gemini_Client import ask_gemini
 
         return local_ai_choice(state)
+
+    from AI_Logic.Gemini_Client import ask_gemini
 
     prompt = build_prompt(state) # passing the game state to builder to create a prompt containing the game state
 
