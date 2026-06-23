@@ -16,7 +16,7 @@ class MenuScreen(Screen):
         self.background = pygame.image.load(MAIN_BG).convert()
         self.background = pygame.transform.scale(
             self.background,
-            (1280, 720)
+            (1280, 680)
         )
 
         # Fonts

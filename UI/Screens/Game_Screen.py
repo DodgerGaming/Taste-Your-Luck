@@ -1,6 +1,7 @@
 import pygame
 
 from UI.Screens.Screen import Screen
+from UI.Elements.Button import Button
 from assets import get_font
 
 from assets import (
@@ -21,8 +22,9 @@ class GameScreen(Screen):
         self.label_font = get_font(16)
         self.turn_font = get_font(20)
         self.dialogue_font = get_font(14)
+        self.button_font = get_font(16)
 
-        # Temporary Game Data
+        # Temporary Game Data (still placeholder — real wiring is next step)
         self.player_hp = 4
         self.enemy_hp = 4
 
@@ -39,7 +41,7 @@ class GameScreen(Screen):
 
         self.background = pygame.transform.scale(
             self.background,
-            (1280, 720)
+            (1280, 630)
         )
 
         # Sprites
@@ -71,7 +73,31 @@ class GameScreen(Screen):
             (250, 120)
         )
 
+        # Buttons
+        self.shoot_self_button = Button(
+            120, 490, 300, 55,
+            "SHOOT SELF",
+            self.button_font,
+            bg_color=(40, 20, 18),
+            hover_color=(85, 40, 30),
+            text_color=(225, 200, 165)
+        )
+
+        self.shoot_enemy_button = Button(
+            860, 490, 300, 55,
+            "SHOOT ENEMY",
+            self.button_font,
+            bg_color=(40, 20, 18),
+            hover_color=(85, 40, 30),
+            text_color=(225, 200, 165)
+        )
+
     def handle_event(self, event):
+
+        # Just hover/click detection for now — wiring these into the
+        # actual game logic is the next step.
+        self.shoot_self_button.handle_event(event)
+        self.shoot_enemy_button.handle_event(event)
 
         if event.type == pygame.KEYDOWN:
 
@@ -119,23 +145,8 @@ class GameScreen(Screen):
         screen.blit(player_hp_text, (50, 50))
         screen.blit(enemy_hp_text, (1050, 50))
 
-        # Sprites
-        screen.blit(
-            self.player,
-            (120, 260)
-        )
-
-        screen.blit(
-            self.enemy,
-            (860, 220)
-        )
-
-        screen.blit(
-            self.shotgun,
-            (515, 310)
-        )
-
-        # Labels
+        # Labels — moved above the sprites (the dialogue box used to
+        # paint over them when they sat at y=580)
         player_text = self.label_font.render(
             "PLAYER",
             True,
@@ -154,16 +165,36 @@ class GameScreen(Screen):
             (255, 255, 255)
         )
 
-        screen.blit(player_text, (180, 580))
-        screen.blit(shotgun_text, (560, 450))
-        screen.blit(enemy_text, (980, 580))
+        screen.blit(player_text, (180, 230))
+        screen.blit(shotgun_text, (560, 290))
+        screen.blit(enemy_text, (980, 190))
 
-        # Dialogue Box
+        # Sprites
+        screen.blit(
+            self.player,
+            (120, 260)
+        )
+
+        screen.blit(
+            self.enemy,
+            (860, 220)
+        )
+
+        screen.blit(
+            self.shotgun,
+            (515, 310)
+        )
+
+        # Buttons
+        self.shoot_self_button.draw(screen)
+        self.shoot_enemy_button.draw(screen)
+
+        # Dialogue Box — moved down slightly to make room for the buttons
         dialogue_rect = pygame.Rect(
             40,
-            560,
+            555,
             1200,
-            120
+            60
         )
 
         pygame.draw.rect(
@@ -189,5 +220,5 @@ class GameScreen(Screen):
 
         screen.blit(
             dialogue_surface,
-            (60, 605)
+            (60, 572)
         )
