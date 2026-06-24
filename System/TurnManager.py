@@ -163,6 +163,14 @@ class TurnManager:
                 self.current_turn = "player"
                 break
 
+            # Check the chamber BEFORE doing anything else. If it's empty,
+            # reload right away and let the enemy act on a fresh chamber —
+            # don't queue "thinking" or any action messages for a shot
+            # that was never actually going to happen.
+            if not self.game.shotgun.bullets:
+                messages.extend(self.reload())
+                continue
+
             choice = get_ai_choice(
                 self.game.player,
                 self.game.enemy,
@@ -171,31 +179,24 @@ class TurnManager:
                 self.game.level
             )
 
-            # Announce enemy is acting BEFORE firing — turn is still "enemy" here
+            # Chamber is guaranteed non-empty here, so this is a real shot
             messages.append(self._snap("The enemy is thinking..."))
 
             if choice == 1:
                 result = shoot(self.game.enemy, self.game.player, self.game.shotgun)
                 messages.extend(self._check_final_showdown())
 
-                if result is None:
-                    self.current_turn = "player"
-                    messages.extend(self.reload())
-                elif result == "blank":
-                    self.current_turn = "player"
+                self.current_turn = "player"
+                if result == "blank":
                     messages.append(self._snap("Enemy fires at you... click. Nothing."))
                 else:
-                    self.current_turn = "player"
                     messages.append(self._snap("The enemy shoots you!"))
 
             else:
                 result = shoot(self.game.enemy, self.game.enemy, self.game.shotgun)
                 messages.extend(self._check_final_showdown())
 
-                if result is None:
-                    self.current_turn = "player"
-                    messages.extend(self.reload())
-                elif result == "blank":
+                if result == "blank":
                     # Keep enemy turn — don't change current_turn
                     messages.append(self._snap("Enemy gambles on itself... click. Nothing."))
                 else:
@@ -207,7 +208,6 @@ class TurnManager:
                 break
 
         return messages
-
     # ------------------------------------------------------------------
     # Level progression
     # ------------------------------------------------------------------
